@@ -8,7 +8,7 @@ pipeline {
     stages {
         stage('Clone Repo') {
             steps {
-                git 'https://github.com/yourusername/ci-cd-demo.git'
+                git 'https://github.com/Cloud-Architect-Emma/ci-cd-demo.git'
             }
         }
 
