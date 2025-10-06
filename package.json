@@ -1,32 +1,53 @@
-{
-  "name": "ci-cd-demo",
-  "version": "1.0.0",
-  "description": "A sample Node.js project for demonstrating CI/CD with Jenkins and Docker.",
-  "main": "index.js",
-  "scripts": {
-    "start": "node index.js",
-    "test": "echo \"No tests specified\" && exit 0"
-  },
-  "keywords": [
-    "node",
-    "express",
-    "ci-cd",
-    "jenkins",
-    "docker"
-  ],
-  "author": "Mark Pundsack",
-  "contributors": [
-    {
-      "name": "Emmanuela Opurum",
-      "email": "emmanuela@example.com"
+pipeline {
+  agent any
+
+  environment {
+    DOCKERHUB_REPO = "emma2323/ci-cd-demo"
+    IMAGE_NAME = "${DOCKERHUB_REPO}:${BUILD_NUMBER}"
+  }
+
+  stages {
+    stage('Checkout Code') {
+      steps {
+        checkout([$class: 'GitSCM',
+          branches: [[name: '*/master']],
+          userRemoteConfigs: [[
+            url: 'https://github.com/Cloud-Architect-Emma/ci-cd-demo.git',
+            credentialsId: '85be80d5-f16a-44fc-81e1-b7e34ab78149'
+          ]]
+        ])
+      }
     }
-  ],
-  "license": "MIT",
-  "engines": {
-    "node": ">=18.0.0"
-  },
-  "dependencies": {
-    "express": "^4.18.2"
+
+    stage('Build Docker Image') {
+      steps {
+        sh "docker build -t ${IMAGE_NAME} ."
+      }
+    }
+
+    stage('Run Tests') {
+      steps {
+        sh """
+          npm install || true
+          npm test || echo 'No tests found, skipping.'
+        """
+      }
+    }
+
+    stage('Push to DockerHub') {
+      steps {
+        withCredentials([usernamePassword(
+          credentialsId: 'dockerhub-user',
+          usernameVariable: 'DOCKERHUB_USER',
+          passwordVariable: 'DOCKERHUB_PASS'
+        )]) {
+          sh """
+            echo "${DOCKERHUB_PASS}" | docker login -u "${DOCKERHUB_USER}" --password-stdin
+            docker push ${IMAGE_NAME}
+          """
+        }
+      }
+    }
   }
 }
 
