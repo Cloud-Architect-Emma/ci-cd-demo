@@ -1,41 +1,43 @@
 pipeline {
-    agent any
+  agent any
 
-    environment {
-        DOCKERHUB_USER = credentials('dockerhub-user')
+  environment {
+    IMAGE_NAME = "emma2323/ci-cd-demo:${BUILD_NUMBER}"
+  }
+
+  stages {
+    stage('Checkout Code') {
+      steps {
+        checkout([$class: 'GitSCM',
+          branches: [[name: '*/master']],
+          userRemoteConfigs: [[
+            url: 'https://github.com/Cloud-Architect-Emma/ci-cd-demo.git',
+            credentialsId: '85be80d5-f16a-44fc-81e1-b7e34ab78149'
+          ]]
+        ])
+      }
     }
 
-    stages {
-        stage('Clone Repo') {
-            steps {
-                git 'https://github.com/Cloud-Architect-Emma/ci-cd-demo.git'
-            }
-        }
-
-        stage('Build Docker Image') {
-            steps {
-                script {
-                    docker.build("yourusername/ci-cd-demo:${BUILD_NUMBER}")
-                }
-            }
-        }
-
-        stage('Run Tests') {
-            steps {
-                sh 'npm install'
-                sh 'npm test || echo "No tests found, skipping"'
-            }
-        }
-
-        stage('Push to DockerHub') {
-            steps {
-                script {
-                    docker.withRegistry('https://index.docker.io/v1/', 'dockerhub-user') {
-                        docker.image("yourusername/ci-cd-demo:${BUILD_NUMBER}").push()
-                    }
-                }
-            }
-        }
+    stage('Build Docker Image') {
+      steps {
+        sh "docker build -t ${IMAGE_NAME} ."
+      }
     }
+
+    stage('Push to DockerHub') {
+      steps {
+        withCredentials([usernamePassword(
+          credentialsId: 'dockerhub-user',
+          usernameVariable: 'DOCKERHUB_USER',
+          passwordVariable: 'DOCKERHUB_PASS'
+        )]) {
+          sh """
+            echo "${DOCKERHUB_PASS}" | docker login -u "${DOCKERHUB_USER}" --password-stdin
+            docker push ${IMAGE_NAME}
+          """
+        }
+      }
+    }
+  }
 }
 

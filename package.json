@@ -1,29 +1,32 @@
 {
-  "name": "node-js-sample",
-  "version": "0.2.0",
-  "description": "A sample Node.js app using Express 4",
+  "name": "ci-cd-demo",
+  "version": "1.0.0",
+  "description": "A sample Node.js project for demonstrating CI/CD with Jenkins and Docker.",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js"
-  },
-  "dependencies": {
-    "express": "^4.13.3"
-  },
-  "engines": {
-    "node": "4.0.0"
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/heroku/node-js-sample"
+    "start": "node index.js",
+    "test": "echo \"No tests specified\" && exit 0"
   },
   "keywords": [
     "node",
-    "heroku",
-    "express"
+    "express",
+    "ci-cd",
+    "jenkins",
+    "docker"
   ],
   "author": "Mark Pundsack",
   "contributors": [
-    "Zeke Sikelianos <zeke@sikelianos.com> (http://zeke.sikelianos.com)"
+    {
+      "name": "Emmanuela Opurum",
+      "email": "emmanuela@example.com"
+    }
   ],
-  "license": "MIT"
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "dependencies": {
+    "express": "^4.18.2"
+  }
 }
+
